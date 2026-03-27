@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: avtr-invoice
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true
+    disk:
+      name: avtr-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
