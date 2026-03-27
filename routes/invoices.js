@@ -37,7 +37,8 @@ router.get('/:id', (req, res) => {
       c.phone as client_phone, c.address as client_address,
       b.name as business_name, b.address as business_address, b.email as business_email,
       b.phone as business_phone, b.logo as business_logo, b.tax_number as business_tax_number,
-      b.bank_name, b.bank_account, b.bank_holder, b.currency
+      b.bank_name, b.bank_account, b.bank_holder, b.currency, b.logo_width,
+      b.payment_instruction, b.signature as business_signature
     FROM invoices i
     LEFT JOIN clients c ON i.client_id = c.id
     LEFT JOIN businesses b ON i.business_id = b.id

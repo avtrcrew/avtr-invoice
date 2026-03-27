@@ -35,8 +35,21 @@ db.exec(`
     tax_rate REAL DEFAULT 6,
     currency TEXT DEFAULT 'RM',
     invoice_prefix TEXT DEFAULT 'INV',
+    logo_width INTEGER DEFAULT 120,
+    payment_instruction TEXT,
+    signature TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
+  );
+
+  CREATE TABLE IF NOT EXISTS items_catalog (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    business_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT,
+    unit_price REAL DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (business_id) REFERENCES businesses(id)
   );
 
   CREATE TABLE IF NOT EXISTS clients (
@@ -95,5 +108,10 @@ if (userCount.count === 0) {
   db.prepare('INSERT INTO businesses (user_id, name, currency, tax_rate, invoice_prefix) VALUES (?, ?, ?, ?, ?)').run(user.lastInsertRowid, 'Business 2', 'RM', 6, 'INV');
   console.log('✅ Default account created. Password: avtr2024');
 }
+
+// Migrations for existing DBs
+try { db.exec('ALTER TABLE businesses ADD COLUMN logo_width INTEGER DEFAULT 120') } catch {}
+try { db.exec('ALTER TABLE businesses ADD COLUMN payment_instruction TEXT') } catch {}
+try { db.exec('ALTER TABLE businesses ADD COLUMN signature TEXT') } catch {}
 
 module.exports = db;

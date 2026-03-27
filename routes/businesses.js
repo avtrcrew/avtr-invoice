@@ -7,9 +7,13 @@ const router = express.Router();
 
 const storage = multer.diskStorage({
   destination: './data/uploads',
-  filename: (req, file, cb) => cb(null, `logo-${Date.now()}${path.extname(file.originalname)}`)
+  filename: (req, file, cb) => cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`)
 });
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
+const uploadFields = upload.fields([
+  { name: 'logo',      maxCount: 1 },
+  { name: 'signature', maxCount: 1 }
+]);
 
 router.use(auth);
 
@@ -18,16 +22,17 @@ router.get('/', (req, res) => {
   res.json(businesses);
 });
 
-router.put('/:id', upload.single('logo'), (req, res) => {
+router.put('/:id', uploadFields, (req, res) => {
   const biz = db.prepare('SELECT * FROM businesses WHERE id = ? AND user_id = ?').get(req.params.id, req.session.userId);
   if (!biz) return res.status(404).json({ error: 'Business not found' });
 
-  const { name, address, email, phone, tax_number, bank_name, bank_account, bank_holder, tax_rate, invoice_prefix } = req.body;
-  const logo = req.file ? `/uploads/${req.file.filename}` : biz.logo;
+  const { name, address, email, phone, tax_number, bank_name, bank_account, bank_holder, tax_rate, invoice_prefix, logo_width, payment_instruction } = req.body;
+  const logo      = req.files?.logo?.[0]      ? `/uploads/${req.files.logo[0].filename}`      : biz.logo;
+  const signature = req.files?.signature?.[0] ? `/uploads/${req.files.signature[0].filename}` : biz.signature;
 
   db.prepare(`
     UPDATE businesses SET name=?, address=?, email=?, phone=?, tax_number=?, bank_name=?, bank_account=?,
-    bank_holder=?, tax_rate=?, logo=?, invoice_prefix=? WHERE id=?
+    bank_holder=?, tax_rate=?, logo=?, invoice_prefix=?, logo_width=?, payment_instruction=?, signature=? WHERE id=?
   `).run(
     name ?? biz.name,
     address ?? biz.address,
@@ -40,6 +45,9 @@ router.put('/:id', upload.single('logo'), (req, res) => {
     tax_rate !== undefined ? parseFloat(tax_rate) : biz.tax_rate,
     logo,
     invoice_prefix ?? biz.invoice_prefix,
+    logo_width !== undefined ? parseInt(logo_width) : (biz.logo_width ?? 120),
+    payment_instruction !== undefined ? payment_instruction : biz.payment_instruction,
+    signature,
     req.params.id
   );
 

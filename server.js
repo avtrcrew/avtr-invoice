@@ -16,6 +16,7 @@ const clientRoutes = require('./routes/clients');
 const invoiceRoutes = require('./routes/invoices');
 const transactionRoutes = require('./routes/transactions');
 const dashboardRoutes = require('./routes/dashboard');
+const catalogRoutes   = require('./routes/catalog');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -41,6 +42,7 @@ app.use('/api/clients', clientRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/catalog',   catalogRoutes);
 
 // Serve uploaded logos/images
 app.use('/uploads', express.static(path.join(__dirname, 'data/uploads')));
