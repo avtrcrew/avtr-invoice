@@ -50,8 +50,10 @@ export default function InvoiceView() {
   if (loading) return <div className="p-8 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600" /></div>
   if (!inv)    return <div className="p-8 text-gray-500">Invoice not found.</div>
 
-  const ss        = STATUS_STYLE[inv.status] || STATUS_STYLE.draft
-  const logoWidth = inv.logo_width ?? 120
+  const ss           = STATUS_STYLE[inv.status] || STATUS_STYLE.draft
+  const logoWidth    = inv.logo_width ?? 120
+  const signPos      = inv.sign_position || 'right'
+  const sigJustify   = signPos === 'left' ? 'flex-start' : signPos === 'center' ? 'center' : 'flex-end'
 
   return (
     <div className="p-4 md:p-8 max-w-4xl">
@@ -92,18 +94,16 @@ export default function InvoiceView() {
             <polygon points="730,0 800,0 800,50" fill="#dc2626" opacity="0.7" />
           </svg>
 
-          {/* Logo — white background box so it always prints correctly */}
+          {/* Logo — NO white box, shown directly on dark background */}
           <div style={{ position: 'absolute', top: 18, left: 24, zIndex: 2 }}>
             {inv.business_logo ? (
-              <div style={{ background: '#ffffff', borderRadius: 8, padding: '6px 10px', display: 'inline-block', boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }}>
-                <img
-                  src={inv.business_logo}
-                  alt="Logo"
-                  style={{ width: logoWidth, maxWidth: 200, maxHeight: 76, objectFit: 'contain', display: 'block' }}
-                />
-              </div>
+              <img
+                src={inv.business_logo}
+                alt="Logo"
+                style={{ width: logoWidth, maxWidth: 200, maxHeight: 80, objectFit: 'contain', display: 'block' }}
+              />
             ) : (
-              <div style={{ color: '#fff', fontSize: 20, fontWeight: 900, letterSpacing: 1 }}>
+              <div style={{ color: '#fff', fontSize: 22, fontWeight: 900, letterSpacing: 1 }}>
                 {inv.business_name}
               </div>
             )}
@@ -131,10 +131,10 @@ export default function InvoiceView() {
         {/* ─── CLIENT INFO BAR ─── */}
         <div style={{ display: 'flex', borderBottom: '3px solid #dc2626', background: '#f9fafb' }}>
           {[
-            { label: "Client's Name", value: inv.client_name || '—' },
+            { label: "Client's Name",    value: inv.client_name || '—' },
             { label: "Client's Company", value: inv.client_company || '—' },
-            { label: 'Date', value: inv.date },
-            { label: 'Due Date', value: inv.due_date || '—' },
+            { label: 'Invoice Date',     value: inv.date },
+            { label: 'Due Date',         value: inv.due_date || '—' },
           ].map((item, i) => (
             <div key={i} style={{
               flex: 1, padding: '10px 16px',
@@ -162,25 +162,21 @@ export default function InvoiceView() {
 
           {/* RIGHT — items table + totals */}
           <div style={{ flex: 1, padding: '20px 20px 0' }}>
-
-            {/* Items table */}
-            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 0, fontSize: 12 }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
               <thead>
                 <tr style={{ background: '#111827' }}>
                   <th style={{ color: '#9ca3af', fontWeight: 600, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', padding: '8px 10px', textAlign: 'center', width: 32 }}>SL</th>
                   <th style={{ color: '#9ca3af', fontWeight: 600, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', padding: '8px 10px', textAlign: 'left' }}>Description</th>
-                  <th style={{ color: '#9ca3af', fontWeight: 600, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', padding: '8px 10px', textAlign: 'center', width: 46 }}>Unit</th>
+                  <th style={{ color: '#9ca3af', fontWeight: 600, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', padding: '8px 10px', textAlign: 'center', width: 46 }}>Qty</th>
                   <th style={{ color: '#9ca3af', fontWeight: 600, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', padding: '8px 10px', textAlign: 'right', width: 80 }}>Rate</th>
-                  <th style={{ color: '#9ca3af', fontWeight: 600, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', padding: '8px 10px', textAlign: 'right', width: 90 }}>Price</th>
+                  <th style={{ color: '#9ca3af', fontWeight: 600, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', padding: '8px 10px', textAlign: 'right', width: 90 }}>Amount</th>
                 </tr>
               </thead>
               <tbody>
                 {inv.items.map((item, i) => (
                   <tr key={i} style={{ borderBottom: '1px solid #f1f5f9', background: i % 2 === 1 ? '#f9fafb' : '#fff' }}>
                     <td style={{ padding: '9px 10px', textAlign: 'center', color: '#dc2626', fontWeight: 700, fontSize: 11 }}>#{i + 1}</td>
-                    <td style={{ padding: '9px 10px', color: '#1f2937', fontWeight: 600 }}>
-                      {item.description}
-                    </td>
+                    <td style={{ padding: '9px 10px', color: '#1f2937', fontWeight: 600 }}>{item.description}</td>
                     <td style={{ padding: '9px 10px', textAlign: 'center', color: '#6b7280' }}>{item.qty}</td>
                     <td style={{ padding: '9px 10px', textAlign: 'right', color: '#6b7280' }}>RM {fmtN(item.unit_price)}</td>
                     <td style={{ padding: '9px 10px', textAlign: 'right', color: '#111827', fontWeight: 700 }}>RM {fmtN(item.qty * item.unit_price)}</td>
@@ -195,13 +191,13 @@ export default function InvoiceView() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', fontSize: 12, color: '#6b7280', borderBottom: '1px solid #f1f5f9' }}>
                   <span>Subtotal</span><span>RM {fmtN(inv.subtotal)}</span>
                 </div>
-                {inv.tax_rate > 0 && (
+                {Number(inv.tax_rate) > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', fontSize: 12, color: '#6b7280', borderBottom: '1px solid #f1f5f9' }}>
                     <span>Tax ({inv.tax_rate}%)</span><span>RM {fmtN(inv.tax_amount)}</span>
                   </div>
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '9px 12px', fontSize: 14, fontWeight: 800, background: '#dc2626', color: '#fff', borderRadius: 6, marginTop: 8 }}>
-                  <span>Total</span><span>{fmt(inv.total)}</span>
+                  <span>TOTAL</span><span>{fmt(inv.total)}</span>
                 </div>
               </div>
             </div>
@@ -209,54 +205,54 @@ export default function InvoiceView() {
             {/* Notes */}
             {inv.notes && (
               <div style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 10, color: '#dc2626', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>
-                  Notes:
-                </div>
+                <div style={{ fontSize: 10, color: '#dc2626', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>Notes:</div>
                 <p style={{ fontSize: 11, color: '#4b5563', lineHeight: 1.6, whiteSpace: 'pre-line' }}>{inv.notes}</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* ─── PAYMENT INSTRUCTION (always shown if set) ─── */}
+        {/* ─── PAYMENT INSTRUCTION ─── always visible if set */}
         {inv.payment_instruction && (
-          <div style={{ borderTop: '1px solid #e5e7eb', padding: '14px 28px', background: '#fff8f8' }}>
-            <div style={{ fontSize: 10, color: '#dc2626', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6 }}>
-              Payment Instruction:
+          <div style={{ borderTop: '2px solid #dc2626', padding: '14px 28px', background: '#fff8f8' }}>
+            <div style={{ fontSize: 10, color: '#dc2626', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>
+              ▶ Payment Instruction
             </div>
-            <p style={{ fontSize: 12, color: '#374151', lineHeight: 1.7, whiteSpace: 'pre-line', margin: 0 }}>
+            <p style={{ fontSize: 12, color: '#374151', lineHeight: 1.8, whiteSpace: 'pre-line', margin: 0 }}>
               {inv.payment_instruction}
             </p>
           </div>
         )}
 
-        {/* ─── SIGNATURE — company only ─── */}
-        <div style={{ borderTop: '1px solid #e5e7eb', padding: '20px 30px', display: 'flex', alignItems: 'flex-end', gap: 30 }}>
-          {/* Company signature */}
-          <div style={{ textAlign: 'center', minWidth: 220 }}>
+        {/* ─── SIGNATURE — position controlled by sign_position setting ─── */}
+        <div style={{ borderTop: '1px solid #e5e7eb', padding: '20px 30px', display: 'flex', justifyContent: sigJustify }}>
+          <div style={{ textAlign: 'center', minWidth: 200 }}>
             {inv.business_signature ? (
               <>
                 <img
                   src={inv.business_signature}
                   alt="Signature"
-                  style={{ height: inv.sign_width ?? 72, maxWidth: 260, objectFit: 'contain', display: 'block', margin: '0 auto' }}
+                  style={{ height: inv.sign_width ?? 72, maxWidth: 280, objectFit: 'contain', display: 'block', margin: '0 auto' }}
                 />
-                <div style={{ borderTop: '1.5px solid #374151', paddingTop: 6, fontSize: 11, color: '#6b7280', marginTop: 4 }}>
-                  Authorised Signature
+                <div style={{ borderTop: '1.5px solid #374151', paddingTop: 6, marginTop: 4 }}>
+                  <div style={{ fontSize: 11, color: '#6b7280' }}>Authorised Signature</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#111827', marginTop: 2 }}>{inv.business_name}</div>
                 </div>
               </>
             ) : (
               <>
                 <div style={{ height: 64, borderBottom: '1.5px solid #374151', marginBottom: 4 }} />
-                <div style={{ paddingTop: 6, fontSize: 11, color: '#6b7280' }}>Authorised Signature</div>
+                <div style={{ paddingTop: 6 }}>
+                  <div style={{ fontSize: 11, color: '#6b7280' }}>Authorised Signature</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#111827', marginTop: 2 }}>{inv.business_name}</div>
+                </div>
               </>
             )}
-            <div style={{ fontSize: 12, fontWeight: 700, color: '#111827', marginTop: 3 }}>{inv.business_name}</div>
           </div>
         </div>
 
         {/* ─── THANK YOU ─── */}
-        <div style={{ textAlign: 'center', padding: '10px 0', fontSize: 12, fontWeight: 700, color: '#dc2626', letterSpacing: 2, textTransform: 'uppercase' }}>
+        <div style={{ textAlign: 'center', padding: '8px 0', fontSize: 12, fontWeight: 700, color: '#dc2626', letterSpacing: 2, textTransform: 'uppercase' }}>
           Thank You For Your Business
         </div>
 
@@ -264,25 +260,19 @@ export default function InvoiceView() {
         <div style={{ background: '#111827', padding: '12px 30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
           {inv.business_address && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ width: 20, height: 20, background: '#dc2626', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ color: '#fff', fontSize: 10 }}>📍</span>
-              </div>
+              <div style={{ width: 20, height: 20, background: '#dc2626', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>📍</div>
               <span style={{ fontSize: 10, color: '#d1d5db' }}>{inv.business_address.replace(/\n/g, ', ')}</span>
             </div>
           )}
           {inv.business_email && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ width: 20, height: 20, background: '#dc2626', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ color: '#fff', fontSize: 10 }}>✉</span>
-              </div>
+              <div style={{ width: 20, height: 20, background: '#dc2626', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>✉</div>
               <span style={{ fontSize: 10, color: '#d1d5db' }}>{inv.business_email}</span>
             </div>
           )}
           {inv.business_phone && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ width: 20, height: 20, background: '#dc2626', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ color: '#fff', fontSize: 10 }}>📞</span>
-              </div>
+              <div style={{ width: 20, height: 20, background: '#dc2626', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>📞</div>
               <span style={{ fontSize: 10, color: '#d1d5db' }}>{inv.business_phone}</span>
             </div>
           )}

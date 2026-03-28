@@ -1,5 +1,6 @@
 const express = require('express');
 const session = require('express-session');
+const multer  = require('multer');
 const path = require('path');
 const fs = require('fs');
 
@@ -43,6 +44,30 @@ app.use('/api/invoices', invoiceRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/catalog',   catalogRoutes);
+
+// ── App-level logo (global, not per business) ──────────────────────────────
+const appLogoStorage = multer.diskStorage({
+  destination: path.join(__dirname, 'data/uploads'),
+  filename: (req, file, cb) => cb(null, 'app-logo' + path.extname(file.originalname).toLowerCase())
+});
+const appLogoUpload = multer({ storage: appLogoStorage, limits: { fileSize: 5 * 1024 * 1024 } });
+const auth = require('./middleware/auth');
+
+app.get('/api/settings/app-logo', (req, res) => {
+  const exts = ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg'];
+  for (const ext of exts) {
+    if (fs.existsSync(path.join(__dirname, 'data/uploads', `app-logo${ext}`))) {
+      return res.json({ logo: `/uploads/app-logo${ext}` });
+    }
+  }
+  res.json({ logo: null });
+});
+
+app.put('/api/settings/app-logo', auth, appLogoUpload.single('logo'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  res.json({ logo: `/uploads/${req.file.filename}` });
+});
+// ────────────────────────────────────────────────────────────────────────────
 
 // Serve uploaded logos/images
 app.use('/uploads', express.static(path.join(__dirname, 'data/uploads')));

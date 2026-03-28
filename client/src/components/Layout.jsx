@@ -13,31 +13,30 @@ const navItems = [
   { to: '/settings',     label: 'Settings',     icon: Settings },
 ]
 
-function SidebarContent({ currentBusiness, businesses, selectBusiness, onLogout, bizOpen, setBizOpen }) {
+function SidebarContent({ currentBusiness, businesses, selectBusiness, onLogout, bizOpen, setBizOpen, appLogo }) {
   return (
     <div className="flex flex-col h-full" style={{ background: '#111827' }}>
 
       {/* Brand / Logo */}
-      <div className="px-5 py-5" style={{ borderBottom: '1px solid #1f2937' }}>
-        <div className="flex items-center gap-2">
-          {currentBusiness?.logo ? (
-            <div style={{ background: '#fff', borderRadius: 8, padding: '3px 6px', display: 'inline-flex', alignItems: 'center', flexShrink: 0 }}>
-              <img
-                src={currentBusiness.logo}
-                alt="Logo"
-                style={{ height: 30, maxWidth: 80, objectFit: 'contain', display: 'block' }}
-              />
-            </div>
-          ) : (
+      <div className="px-4 py-4" style={{ borderBottom: '1px solid #1f2937' }}>
+        {appLogo ? (
+          <img
+            src={appLogo}
+            alt="App Logo"
+            style={{ maxHeight: 52, maxWidth: 160, objectFit: 'contain', display: 'block' }}
+            onError={e => { e.target.style.display = 'none' }}
+          />
+        ) : (
+          <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: '#dc2626' }}>
               <span className="text-white font-bold text-sm">A</span>
             </div>
-          )}
-          <div>
-            <p className="font-bold text-sm leading-tight" style={{ color: '#f9fafb' }}>AVTR</p>
-            <p className="text-xs" style={{ color: '#6b7280' }}>Invoice Generator</p>
+            <div>
+              <p className="font-bold text-sm leading-tight" style={{ color: '#f9fafb' }}>AVTR</p>
+              <p className="text-xs" style={{ color: '#6b7280' }}>Invoice Generator</p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Business Switcher */}
@@ -117,7 +116,7 @@ function SidebarContent({ currentBusiness, businesses, selectBusiness, onLogout,
 }
 
 export default function Layout() {
-  const { businesses, currentBusiness, selectBusiness, logout } = useApp()
+  const { businesses, currentBusiness, selectBusiness, logout, appLogo } = useApp()
   const [bizOpen, setBizOpen]       = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const navigate  = useNavigate()
@@ -131,7 +130,7 @@ export default function Layout() {
     navigate('/login')
   }
 
-  const sidebarProps = { currentBusiness, businesses, selectBusiness, onLogout: handleLogout, bizOpen, setBizOpen }
+  const sidebarProps = { currentBusiness, businesses, selectBusiness, onLogout: handleLogout, bizOpen, setBizOpen, appLogo }
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -174,10 +173,8 @@ export default function Layout() {
             <Menu className="w-6 h-6" />
           </button>
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            {currentBusiness?.logo ? (
-              <div style={{ background: '#fff', borderRadius: 5, padding: '2px 5px' }}>
-                <img src={currentBusiness.logo} alt="" style={{ height: 26, maxWidth: 60, objectFit: 'contain', display: 'block' }} />
-              </div>
+            {appLogo ? (
+              <img src={appLogo} alt="" style={{ height: 30, maxWidth: 90, objectFit: 'contain', display: 'block' }} onError={e => { e.target.style.display = 'none' }} />
             ) : (
               <div className="w-7 h-7 rounded flex items-center justify-center flex-shrink-0" style={{ background: '#dc2626' }}>
                 <span className="text-white font-bold text-xs">A</span>

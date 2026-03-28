@@ -18,10 +18,18 @@ export const useApp = () => useContext(AppContext)
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(null)
-  const [businesses, setBusinesses] = useState([])
+  const [businesses, setBusinesses]           = useState([])
   const [currentBusiness, setCurrentBusiness] = useState(null)
+  const [appLogo, setAppLogo]                 = useState(null)
 
   useEffect(() => { checkAuth() }, [])
+
+  // Load global app logo (not per-business)
+  useEffect(() => {
+    axios.get('/api/settings/app-logo')
+      .then(r => { if (r.data.logo) setAppLogo(r.data.logo) })
+      .catch(() => {})
+  }, [])
 
   const checkAuth = async () => {
     try {
@@ -39,6 +47,7 @@ function App() {
     const savedId = localStorage.getItem('currentBusinessId')
     const found = res.data.find(b => b.id === parseInt(savedId))
     setCurrentBusiness(found || res.data[0])
+    return res.data
   }
 
   const selectBusiness = (biz) => {
@@ -61,13 +70,17 @@ function App() {
   if (isAuthenticated === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600" />
       </div>
     )
   }
 
   return (
-    <AppContext.Provider value={{ businesses, currentBusiness, selectBusiness, logout, refreshBusinesses: loadBusinesses }}>
+    <AppContext.Provider value={{
+      businesses, currentBusiness, selectBusiness,
+      logout, refreshBusinesses: loadBusinesses,
+      appLogo, setAppLogo
+    }}>
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <Login onLogin={login} />} />

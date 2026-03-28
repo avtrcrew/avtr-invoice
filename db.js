@@ -37,6 +37,7 @@ db.exec(`
     invoice_prefix TEXT DEFAULT 'INV',
     logo_width INTEGER DEFAULT 120,
     sign_width INTEGER DEFAULT 72,
+    sign_position TEXT DEFAULT 'right',
     payment_instruction TEXT,
     signature TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -115,5 +116,6 @@ try { db.exec('ALTER TABLE businesses ADD COLUMN logo_width INTEGER DEFAULT 120'
 try { db.exec('ALTER TABLE businesses ADD COLUMN payment_instruction TEXT') } catch {}
 try { db.exec('ALTER TABLE businesses ADD COLUMN signature TEXT') } catch {}
 try { db.exec('ALTER TABLE businesses ADD COLUMN sign_width INTEGER DEFAULT 72') } catch {}
+try { db.exec("ALTER TABLE businesses ADD COLUMN sign_position TEXT DEFAULT 'right'") } catch {}
 
 module.exports = db;
