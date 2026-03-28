@@ -57,10 +57,21 @@ export default function Dashboard() {
   return (
     <div className="p-8 max-w-6xl">
       {/* Header */}
-      <div className="mb-7 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{currentBusiness.name}</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Overview of your financial activity</p>
+      <div className="mb-7 flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-4">
+          {currentBusiness.logo && (
+            <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '6px 12px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+              <img
+                src={currentBusiness.logo}
+                alt={currentBusiness.name}
+                style={{ height: 48, maxWidth: 140, objectFit: 'contain', display: 'block' }}
+              />
+            </div>
+          )}
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">{currentBusiness.name}</h1>
+            <p className="text-gray-500 text-sm mt-0.5">Overview of your financial activity</p>
+          </div>
         </div>
         <div className="flex gap-2">
           <button onClick={() => navigate('/invoices/new')} className="btn-primary">

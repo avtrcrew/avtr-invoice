@@ -17,8 +17,9 @@ router.get('/', (req, res) => {
 });
 
 router.get('/next-number/:business_id', (req, res) => {
-  const biz = db.prepare('SELECT invoice_prefix FROM businesses WHERE id = ?').get(req.params.business_id);
+  const biz = db.prepare('SELECT invoice_prefix, tax_rate FROM businesses WHERE id = ?').get(req.params.business_id);
   const prefix = biz?.invoice_prefix || 'INV';
+  const taxRate = biz?.tax_rate ?? 6;
   const last = db.prepare(
     'SELECT invoice_number FROM invoices WHERE business_id = ? ORDER BY id DESC LIMIT 1'
   ).get(req.params.business_id);
@@ -27,7 +28,7 @@ router.get('/next-number/:business_id', (req, res) => {
     const match = last.invoice_number.match(/(\d+)$/);
     if (match) num = parseInt(match[1]) + 1;
   }
-  res.json({ invoice_number: `${prefix}-${String(num).padStart(4, '0')}` });
+  res.json({ invoice_number: `${prefix}-${String(num).padStart(4, '0')}`, tax_rate: taxRate });
 });
 
 router.get('/:id', (req, res) => {
@@ -37,7 +38,7 @@ router.get('/:id', (req, res) => {
       c.phone as client_phone, c.address as client_address,
       b.name as business_name, b.address as business_address, b.email as business_email,
       b.phone as business_phone, b.logo as business_logo, b.tax_number as business_tax_number,
-      b.bank_name, b.bank_account, b.bank_holder, b.currency, b.logo_width,
+      b.bank_name, b.bank_account, b.bank_holder, b.currency, b.logo_width, b.sign_width,
       b.payment_instruction, b.signature as business_signature
     FROM invoices i
     LEFT JOIN clients c ON i.client_id = c.id

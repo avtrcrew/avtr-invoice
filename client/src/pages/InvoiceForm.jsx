@@ -73,7 +73,7 @@ export default function InvoiceForm() {
 
   const loadNextNumber = async () => {
     const res = await axios.get(`/api/invoices/next-number/${currentBusiness.id}`)
-    setForm(f => ({ ...f, invoice_number: res.data.invoice_number, tax_rate: currentBusiness.tax_rate || 6 }))
+    setForm(f => ({ ...f, invoice_number: res.data.invoice_number, tax_rate: Number(res.data.tax_rate) || 0 }))
   }
 
   const loadInvoice = async () => {

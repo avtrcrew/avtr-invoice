@@ -20,6 +20,28 @@ function Field({ label, value, onChange, type = 'text', placeholder }) {
   )
 }
 
+function PhoneField({ label, value, onChange, placeholder }) {
+  // Only allow digits, +, -, spaces, ( )
+  const handleChange = (e) => {
+    const raw = e.target.value
+    const cleaned = raw.replace(/[^\d\s\+\-\(\)]/g, '')
+    onChange(cleaned)
+  }
+  return (
+    <div>
+      <label className="block text-xs font-medium text-gray-600 mb-1.5">{label}</label>
+      <input
+        type="tel"
+        inputMode="tel"
+        className="input"
+        placeholder={placeholder}
+        value={value ?? ''}
+        onChange={handleChange}
+      />
+    </div>
+  )
+}
+
 function TextArea({ label, value, onChange, placeholder }) {
   return (
     <div>
@@ -30,6 +52,62 @@ function TextArea({ label, value, onChange, placeholder }) {
         value={value ?? ''}
         onChange={e => onChange(e.target.value)}
       />
+    </div>
+  )
+}
+
+// ── Mini invoice header preview ──────────────────────────────────────────────
+function LogoPreview({ logoSrc, logoWidth, businessName }) {
+  const w = logoWidth ?? 120
+  return (
+    <div style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid #e5e7eb', maxWidth: 400 }}>
+      <div style={{ position: 'relative', height: 90, background: '#fff' }}>
+        {/* SVG geometric header */}
+        <svg width="100%" height="90" viewBox="0 0 400 90" preserveAspectRatio="none"
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
+          <polygon points="0,0 290,0 210,90 0,90" fill="#111827" />
+          <polygon points="250,0 320,0 240,90 170,90" fill="#dc2626" />
+          <polygon points="300,0 400,0 400,90 220,90" fill="#111827" />
+          <polygon points="365,0 400,0 400,32" fill="#dc2626" opacity="0.7" />
+        </svg>
+        {/* Logo */}
+        <div style={{ position: 'absolute', top: 12, left: 14, zIndex: 2 }}>
+          {logoSrc ? (
+            <div style={{ background: '#fff', borderRadius: 6, padding: '4px 7px', display: 'inline-block', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }}>
+              <img src={logoSrc} alt="Logo" style={{ width: w * 0.5, maxWidth: 130, maxHeight: 50, objectFit: 'contain', display: 'block' }} />
+            </div>
+          ) : (
+            <div style={{ color: '#fff', fontSize: 12, fontWeight: 900 }}>{businessName}</div>
+          )}
+        </div>
+        {/* INVOICE text */}
+        <div style={{ position: 'absolute', right: 14, top: 14, zIndex: 2, textAlign: 'right' }}>
+          <div style={{ fontSize: 20, fontWeight: 900, color: '#fff', letterSpacing: 3 }}>INVOICE</div>
+          <div style={{ color: '#fca5a5', fontSize: 8, fontWeight: 600 }}>INV-0001</div>
+        </div>
+      </div>
+      <div style={{ padding: '4px 10px', background: '#f9fafb', borderTop: '1px solid #e5e7eb' }}>
+        <p style={{ fontSize: 10, color: '#6b7280', margin: 0 }}>Preview — logo at {w}px wide</p>
+      </div>
+    </div>
+  )
+}
+
+// ── Mini signature preview ────────────────────────────────────────────────────
+function SignaturePreview({ sigSrc, signWidth, businessName }) {
+  const h = signWidth ?? 72
+  return (
+    <div style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: '12px 18px', maxWidth: 300, background: '#fff' }}>
+      {sigSrc ? (
+        <img src={sigSrc} alt="Signature" style={{ height: h, maxWidth: 260, objectFit: 'contain', display: 'block', margin: '0 auto' }} />
+      ) : (
+        <div style={{ height: h, borderBottom: '1.5px solid #374151', marginBottom: 4 }} />
+      )}
+      <div style={{ borderTop: sigSrc ? '1.5px solid #374151' : 'none', paddingTop: 5, textAlign: 'center', marginTop: 4 }}>
+        <div style={{ fontSize: 10, color: '#6b7280' }}>Authorised Signature</div>
+        <div style={{ fontSize: 11, fontWeight: 700, color: '#111827' }}>{businessName}</div>
+      </div>
+      <p style={{ fontSize: 10, color: '#6b7280', marginTop: 6, marginBottom: 0 }}>Preview — signature at {h}px tall</p>
     </div>
   )
 }
@@ -63,9 +141,10 @@ export default function Settings() {
         bank_name:           b.bank_name || '',
         bank_account:        b.bank_account || '',
         bank_holder:         b.bank_holder || '',
-        tax_rate:            b.tax_rate ?? 6,
+        tax_rate:            b.tax_rate ?? 0,
         invoice_prefix:      b.invoice_prefix || 'INV',
         logo_width:          b.logo_width ?? 120,
+        sign_width:          b.sign_width ?? 72,
         payment_instruction: b.payment_instruction || '',
         logo:                b.logo || '',
         signature:           b.signature || '',
@@ -87,13 +166,15 @@ export default function Settings() {
     setSavingSig(true)
     setSigSaved(false)
     try {
-      const biz = businesses[idx]
+      const biz = businesses[activeTab]
+      const form = bizForms[activeTab]
       const fd  = new FormData()
       fd.append('name',           form.name || biz.name)
       fd.append('signature_data', dataURL)
+      fd.append('sign_width',     form.sign_width ?? 72)
       await axios.put(`/api/businesses/${biz.id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
       await refreshBusinesses()
-      setBizForms(forms => forms.map((f, i) => i === idx ? { ...f, signature: dataURL } : f))
+      setBizForms(forms => forms.map((f, i) => i === activeTab ? { ...f, signature: dataURL } : f))
       setSigSaved(true)
       setTimeout(() => setSigSaved(false), 2500)
     } finally { setSavingSig(false) }
@@ -106,13 +187,12 @@ export default function Settings() {
       const biz = businesses[idx]
       const form = bizForms[idx]
       const fd = new FormData()
-      Object.entries(form).forEach(([k, v]) => { if (k !== 'logo') fd.append(k, v ?? '') })
+      Object.entries(form).forEach(([k, v]) => { if (k !== 'logo' && k !== 'signature') fd.append(k, v ?? '') })
       if (logoFile && activeTab === idx) fd.append('logo', logoFile)
       await axios.put(`/api/businesses/${biz.id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
       await refreshBusinesses()
       setSaved(true)
       setLogoFile(null)
-      setSigFile(null)
       setTimeout(() => setSaved(false), 2500)
     } finally { setSaving(false) }
   }
@@ -133,23 +213,25 @@ export default function Settings() {
 
   if (!bizForms.length) return <div className="p-8 text-gray-400">Loading…</div>
 
-  const idx  = activeTab
+  const idx  = activeTab === 'password' ? 0 : activeTab
   const form = bizForms[idx] || {}
 
+  const currentLogoSrc = logoPreview || form.logo || null
+
   return (
-    <div className="p-8 max-w-3xl">
+    <div className="p-4 md:p-8 max-w-3xl">
       <div className="mb-7">
         <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
         <p className="text-gray-500 text-sm mt-0.5">Manage your businesses and account</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 border-b border-gray-100">
+      <div className="flex gap-1 mb-6 border-b border-gray-100 overflow-x-auto">
         {businesses.map((biz, i) => (
           <button
             key={biz.id}
             onClick={() => { setActiveTab(i); setLogoPreview(null); setLogoFile(null); setSaved(false) }}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition -mb-px ${
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition -mb-px whitespace-nowrap ${
               activeTab === i ? 'border-red-600 text-red-600' : 'border-transparent text-gray-500 hover:text-gray-800'
             }`}
           >
@@ -159,7 +241,7 @@ export default function Settings() {
         ))}
         <button
           onClick={() => setActiveTab('password')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition -mb-px ${
+          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition -mb-px whitespace-nowrap ${
             activeTab === 'password' ? 'border-red-600 text-red-600' : 'border-transparent text-gray-500 hover:text-gray-800'
           }`}
         >
@@ -217,24 +299,20 @@ export default function Settings() {
           {/* Logo */}
           <div className="card p-5">
             <h2 className="font-semibold text-gray-800 text-sm mb-4">Business Logo</h2>
-            <div className="flex items-start gap-6">
-              {/* Preview */}
-              <div
-                className="border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center overflow-hidden bg-gray-50 flex-shrink-0"
-                style={{ width: `${form.logo_width ?? 120}px`, minHeight: '80px', maxWidth: '240px' }}
-              >
-                {(logoPreview || form.logo) ? (
-                  <img
-                    src={logoPreview || form.logo}
-                    alt="Logo"
-                    style={{ width: '100%', height: 'auto', objectFit: 'contain' }}
-                  />
-                ) : (
-                  <span className="text-gray-300 text-xs text-center px-3 py-4">No logo</span>
-                )}
-              </div>
 
-              <div className="flex-1 space-y-3">
+            <div className="space-y-4">
+              {/* Upload button */}
+              <div className="flex items-center gap-4">
+                <div
+                  className="border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center overflow-hidden bg-gray-50 flex-shrink-0"
+                  style={{ width: 80, height: 56 }}
+                >
+                  {currentLogoSrc ? (
+                    <img src={currentLogoSrc} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  ) : (
+                    <span className="text-gray-300 text-xs text-center px-2">No logo</span>
+                  )}
+                </div>
                 <div>
                   <input
                     type="file"
@@ -246,27 +324,29 @@ export default function Settings() {
                   <button onClick={() => fileRef.current.click()} className="btn-secondary">
                     <Upload className="w-4 h-4" /> Upload Logo
                   </button>
-                  <p className="text-xs text-gray-400 mt-1.5">PNG, JPG up to 5MB</p>
+                  <p className="text-xs text-gray-400 mt-1">PNG with transparent background recommended</p>
                 </div>
+              </div>
 
-                {/* Logo size slider */}
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    Logo Size on Invoice — <span className="text-red-600">{form.logo_width ?? 120}px</span>
-                  </label>
-                  <input
-                    type="range"
-                    min="60"
-                    max="240"
-                    step="10"
-                    className="w-full accent-blue-600"
-                    value={form.logo_width ?? 120}
-                    onChange={e => set(idx, 'logo_width')(parseInt(e.target.value))}
-                  />
-                  <div className="flex justify-between text-xs text-gray-400 mt-0.5">
-                    <span>Small</span><span>Large</span>
-                  </div>
+              {/* Logo size slider */}
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                  Logo Size on Invoice — <span className="text-red-600 font-bold">{form.logo_width ?? 120}px</span>
+                </label>
+                <input
+                  type="range"
+                  min="60"
+                  max="240"
+                  step="10"
+                  className="w-full accent-red-600"
+                  value={form.logo_width ?? 120}
+                  onChange={e => set(idx, 'logo_width')(parseInt(e.target.value))}
+                />
+                <div className="flex justify-between text-xs text-gray-400 mt-0.5 mb-3">
+                  <span>Small</span><span>Large</span>
                 </div>
+                {/* Live invoice header preview */}
+                <LogoPreview logoSrc={currentLogoSrc} logoWidth={form.logo_width ?? 120} businessName={form.name} />
               </div>
             </div>
           </div>
@@ -274,10 +354,10 @@ export default function Settings() {
           {/* Business Info */}
           <div className="card p-5 space-y-4">
             <h2 className="font-semibold text-gray-800 text-sm">Business Information</h2>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field label="Business Name *"  value={form.name}       onChange={set(idx,'name')}       placeholder="My Business Sdn Bhd" />
               <Field label="Email"            value={form.email}      onChange={set(idx,'email')}      type="email" placeholder="hello@mybusiness.com" />
-              <Field label="Phone"            value={form.phone}      onChange={set(idx,'phone')}      placeholder="+60 3-1234 5678" />
+              <PhoneField label="Phone"       value={form.phone}      onChange={set(idx,'phone')}      placeholder="+60123456789" />
               <Field label="Tax / SSM Number" value={form.tax_number} onChange={set(idx,'tax_number')} placeholder="SSM 12345678" />
             </div>
             <TextArea
@@ -291,16 +371,17 @@ export default function Settings() {
           {/* Invoice Settings */}
           <div className="card p-5 space-y-4">
             <h2 className="font-semibold text-gray-800 text-sm">Invoice Settings</h2>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field label="Invoice Prefix"     value={form.invoice_prefix} onChange={set(idx,'invoice_prefix')} placeholder="INV" />
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1.5">Default Tax Rate (%)</label>
                 <input
                   type="number" min="0" max="100" step="0.1"
                   className="input"
-                  value={form.tax_rate ?? 6}
+                  value={form.tax_rate ?? 0}
                   onChange={e => set(idx,'tax_rate')(e.target.value)}
                 />
+                <p className="text-xs text-gray-400 mt-1">Set 0 for no tax. Applied automatically on new invoices.</p>
               </div>
             </div>
           </div>
@@ -309,7 +390,7 @@ export default function Settings() {
           <div className="card p-5 space-y-4">
             <h2 className="font-semibold text-gray-800 text-sm">Bank / Payment Details</h2>
             <p className="text-xs text-gray-400">These appear on your invoices so clients know where to pay.</p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field label="Bank Name"           value={form.bank_name}    onChange={set(idx,'bank_name')}    placeholder="Maybank" />
               <Field label="Account Number"      value={form.bank_account} onChange={set(idx,'bank_account')} placeholder="5123 4567 8901" />
               <Field label="Account Holder Name" value={form.bank_holder}  onChange={set(idx,'bank_holder')}  placeholder="My Business Sdn Bhd" />
@@ -318,15 +399,15 @@ export default function Settings() {
               label="Payment Instruction (shown on invoice)"
               value={form.payment_instruction}
               onChange={set(idx,'payment_instruction')}
-              placeholder="e.g. Please transfer payment within 7 days. Include invoice number as reference."
+              placeholder="e.g. Please transfer within 7 days. Use invoice number as reference."
             />
           </div>
 
-          {/* Owner Signature — draw pad */}
+          {/* Owner Signature */}
           <div className="card p-5">
             <h2 className="font-semibold text-gray-800 text-sm mb-1">Owner / Authorised Signature</h2>
             <p className="text-xs text-gray-400 mb-4">
-              Draw your signature below using your mouse or finger. It will appear on every invoice.
+              Draw your signature below. It will appear on every invoice.
             </p>
             <SignaturePad
               existing={form.signature}
@@ -334,7 +415,29 @@ export default function Settings() {
               saving={savingSig}
             />
             {sigSaved && (
-              <p className="text-sm text-green-600 mt-2">✓ Signature saved successfully.</p>
+              <p className="text-sm text-green-600 mt-2">✓ Signature saved.</p>
+            )}
+
+            {/* Signature size slider + preview */}
+            {form.signature && (
+              <div className="mt-5 pt-5 border-t border-gray-100">
+                <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                  Signature Size on Invoice — <span className="text-red-600 font-bold">{form.sign_width ?? 72}px</span> tall
+                </label>
+                <input
+                  type="range"
+                  min="40"
+                  max="140"
+                  step="4"
+                  className="w-full accent-red-600"
+                  value={form.sign_width ?? 72}
+                  onChange={e => set(idx, 'sign_width')(parseInt(e.target.value))}
+                />
+                <div className="flex justify-between text-xs text-gray-400 mt-0.5 mb-3">
+                  <span>Small</span><span>Large</span>
+                </div>
+                <SignaturePreview sigSrc={form.signature} signWidth={form.sign_width ?? 72} businessName={form.name} />
+              </div>
             )}
           </div>
 

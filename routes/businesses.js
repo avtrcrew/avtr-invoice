@@ -26,7 +26,7 @@ router.put('/:id', uploadFields, (req, res) => {
   const biz = db.prepare('SELECT * FROM businesses WHERE id = ? AND user_id = ?').get(req.params.id, req.session.userId);
   if (!biz) return res.status(404).json({ error: 'Business not found' });
 
-  const { name, address, email, phone, tax_number, bank_name, bank_account, bank_holder, tax_rate, invoice_prefix, logo_width, payment_instruction } = req.body;
+  const { name, address, email, phone, tax_number, bank_name, bank_account, bank_holder, tax_rate, invoice_prefix, logo_width, sign_width, payment_instruction } = req.body;
   const logo = req.files?.logo?.[0] ? `/uploads/${req.files.logo[0].filename}` : biz.logo;
   // signature: accept drawn data URL OR uploaded file, else keep existing
   let signature = biz.signature;
@@ -35,7 +35,7 @@ router.put('/:id', uploadFields, (req, res) => {
 
   db.prepare(`
     UPDATE businesses SET name=?, address=?, email=?, phone=?, tax_number=?, bank_name=?, bank_account=?,
-    bank_holder=?, tax_rate=?, logo=?, invoice_prefix=?, logo_width=?, payment_instruction=?, signature=? WHERE id=?
+    bank_holder=?, tax_rate=?, logo=?, invoice_prefix=?, logo_width=?, sign_width=?, payment_instruction=?, signature=? WHERE id=?
   `).run(
     name ?? biz.name,
     address ?? biz.address,
@@ -49,6 +49,7 @@ router.put('/:id', uploadFields, (req, res) => {
     logo,
     invoice_prefix ?? biz.invoice_prefix,
     logo_width !== undefined ? parseInt(logo_width) : (biz.logo_width ?? 120),
+    sign_width !== undefined ? parseInt(sign_width) : (biz.sign_width ?? 72),
     payment_instruction !== undefined ? payment_instruction : biz.payment_instruction,
     signature,
     req.params.id
