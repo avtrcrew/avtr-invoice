@@ -17,26 +17,14 @@ function SidebarContent({ currentBusiness, businesses, selectBusiness, onLogout,
   return (
     <div className="flex flex-col h-full" style={{ background: '#111827' }}>
 
-      {/* Brand / Logo */}
-      <div className="px-4 py-4" style={{ borderBottom: '1px solid #1f2937' }}>
-        {appLogo ? (
-          <img
-            src={appLogo}
-            alt="App Logo"
-            style={{ maxHeight: 52, maxWidth: 160, objectFit: 'contain', display: 'block' }}
-            onError={e => { e.target.style.display = 'none' }}
-          />
-        ) : (
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: '#dc2626' }}>
-              <span className="text-white font-bold text-sm">A</span>
-            </div>
-            <div>
-              <p className="font-bold text-sm leading-tight" style={{ color: '#f9fafb' }}>AVTR</p>
-              <p className="text-xs" style={{ color: '#6b7280' }}>Invoice Generator</p>
-            </div>
-          </div>
-        )}
+      {/* Brand / Logo — always shows bundled AVTR logo; uploaded logo overrides */}
+      <div className="px-4 py-3" style={{ borderBottom: '1px solid #1f2937' }}>
+        <img
+          src={appLogo || '/avtr-logo.svg'}
+          alt="AVIATOR CREW"
+          style={{ maxHeight: 56, maxWidth: 180, objectFit: 'contain', display: 'block' }}
+          onError={e => { e.target.src = '/avtr-logo.svg' }}
+        />
       </div>
 
       {/* Business Switcher */}
@@ -173,14 +161,13 @@ export default function Layout() {
             <Menu className="w-6 h-6" />
           </button>
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            {appLogo ? (
-              <img src={appLogo} alt="" style={{ height: 30, maxWidth: 90, objectFit: 'contain', display: 'block' }} onError={e => { e.target.style.display = 'none' }} />
-            ) : (
-              <div className="w-7 h-7 rounded flex items-center justify-center flex-shrink-0" style={{ background: '#dc2626' }}>
-                <span className="text-white font-bold text-xs">A</span>
-              </div>
-            )}
-            <span className="font-bold text-white text-sm truncate">{currentBusiness?.name || 'AVTR'}</span>
+            <img
+              src={appLogo || '/avtr-logo.svg'}
+              alt="AVIATOR CREW"
+              style={{ height: 32, maxWidth: 90, objectFit: 'contain', display: 'block' }}
+              onError={e => { e.target.src = '/avtr-logo.svg' }}
+            />
+            <span className="font-bold text-white text-sm truncate">{currentBusiness?.name || ''}</span>
           </div>
         </div>
 

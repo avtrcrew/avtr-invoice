@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 110" style="background:#000000">
+  <rect width="320" height="110" fill="#000000"/>
+
+  <!-- Left wing shape (dark gray) -->
+  <polygon points="0,15 155,58 80,110 0,110" fill="#1a1a1a"/>
+  <!-- Right wing shape (dark gray) -->
+  <polygon points="320,15 165,58 240,110 320,110" fill="#1a1a1a"/>
+
+  <!-- Left wing red accent stripe -->
+  <polygon points="0,15 100,15 55,80 0,80" fill="#dc2626" opacity="0.85"/>
+  <polygon points="0,15 60,15 25,58 0,58" fill="#1565b8" opacity="0.9"/>
+  <!-- Flag-like stripe on left wing -->
+  <polygon points="0,58 25,58 0,80" fill="#dc2626" opacity="0.7"/>
+
+  <!-- Right wing red accent stripe -->
+  <polygon points="320,15 220,15 265,80 320,80" fill="#dc2626" opacity="0.85"/>
+
+  <!-- Pilot helmet - simple geometric shape -->
+  <ellipse cx="160" cy="34" rx="28" ry="26" fill="#2d2d2d"/>
+  <!-- Visor -->
+  <ellipse cx="160" cy="36" rx="20" ry="14" fill="#1a1a1a"/>
+  <ellipse cx="160" cy="36" rx="17" ry="11" fill="#0a0a0a" opacity="0.8"/>
+  <!-- Helmet highlight -->
+  <ellipse cx="152" cy="26" rx="8" ry="5" fill="#444" opacity="0.6"/>
+  <!-- Oxygen mask -->
+  <ellipse cx="160" cy="52" rx="14" ry="10" fill="#3a3a3a"/>
+  <rect x="148" y="56" width="24" height="8" rx="4" fill="#2a2a2a"/>
+  <!-- Mask connector dot -->
+  <circle cx="160" cy="60" r="2" fill="#dc2626"/>
+  <!-- Helmet chin strap lines -->
+  <line x1="148" y1="55" x2="140" y2="65" stroke="#555" stroke-width="2"/>
+  <line x1="172" y1="55" x2="180" y2="65" stroke="#555" stroke-width="2"/>
+
+  <!-- AVIATOR text -->
+  <text x="160" y="82"
+    font-family="Arial Black, 'Arial Bold', sans-serif"
+    font-weight="900"
+    font-size="30"
+    fill="#FFD700"
+    text-anchor="middle"
+    letter-spacing="2"
+    font-style="italic">AVIATOR</text>
+
+  <!-- Red accent bars flanking CREW -->
+  <polygon points="68,90 80,86 80,94" fill="#dc2626"/>
+  <polygon points="252,90 240,86 240,94" fill="#dc2626"/>
+
+  <!-- CREW text -->
+  <text x="160" y="102"
+    font-family="Arial Black, 'Arial Bold', sans-serif"
+    font-weight="900"
+    font-size="18"
+    fill="#FFD700"
+    text-anchor="middle"
+    letter-spacing="4">CREW</text>
+</svg>
