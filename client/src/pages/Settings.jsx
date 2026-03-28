@@ -51,33 +51,49 @@ function TextArea({ label, value, onChange, placeholder }) {
   )
 }
 
-// ── Mini invoice header preview ─────────────────────────────────────────────
+// ── Mini invoice header preview — matches new red/white design ───────────────
 function LogoPreview({ logoSrc, logoWidth, businessName }) {
   const w = logoWidth ?? 120
+  // Scale the preview to 50% so it fits in the settings panel
+  const scale = 0.5
+  const previewW = Math.round(w * scale)
   return (
-    <div style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid #e5e7eb', maxWidth: 400 }}>
-      <div style={{ position: 'relative', height: 90, background: '#fff' }}>
-        <svg width="100%" height="90" viewBox="0 0 400 90" preserveAspectRatio="none"
-          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
-          <polygon points="0,0 290,0 210,90 0,90" fill="#111827" />
-          <polygon points="250,0 320,0 240,90 170,90" fill="#dc2626" />
-          <polygon points="300,0 400,0 400,90 220,90" fill="#111827" />
-          <polygon points="365,0 400,0 400,32" fill="#dc2626" opacity="0.7" />
-        </svg>
-        <div style={{ position: 'absolute', top: 12, left: 14, zIndex: 2 }}>
+    <div style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid #e5e7eb', maxWidth: 420 }}>
+      {/* Red header — mirrors actual invoice layout */}
+      <div style={{
+        background: '#dc2626',
+        padding: '14px 16px 12px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        gap: 8
+      }}>
+        {/* Logo + name column */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 0, flex: 1 }}>
           {logoSrc ? (
-            <img src={logoSrc} alt="Logo" style={{ width: w * 0.5, maxWidth: 130, maxHeight: 50, objectFit: 'contain', display: 'block' }} />
+            <>
+              <img
+                src={logoSrc}
+                alt="Logo"
+                style={{ width: previewW, height: 'auto', maxHeight: 50, objectFit: 'contain', display: 'block', alignSelf: 'flex-start' }}
+              />
+              <div style={{ color: 'rgba(255,255,255,0.85)', fontSize: 8, fontWeight: 700, marginTop: 4 }}>
+                {businessName}
+              </div>
+            </>
           ) : (
-            <div style={{ color: '#fff', fontSize: 12, fontWeight: 900 }}>{businessName}</div>
+            <div style={{ color: '#fff', fontSize: 11, fontWeight: 900 }}>{businessName}</div>
           )}
         </div>
-        <div style={{ position: 'absolute', right: 14, top: 14, zIndex: 2, textAlign: 'right' }}>
-          <div style={{ fontSize: 20, fontWeight: 900, color: '#fff', letterSpacing: 3 }}>INVOICE</div>
-          <div style={{ color: '#fca5a5', fontSize: 8 }}>INV-0001</div>
+        {/* INVOICE title */}
+        <div style={{ textAlign: 'right', flexShrink: 0 }}>
+          <div style={{ fontSize: 18, fontWeight: 900, color: '#fff', letterSpacing: 3, lineHeight: 1 }}>INVOICE</div>
+          <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.75)', fontWeight: 600, marginTop: 4 }}>INV-0001</div>
         </div>
       </div>
-      <div style={{ padding: '4px 10px', background: '#f9fafb', borderTop: '1px solid #e5e7eb' }}>
-        <p style={{ fontSize: 10, color: '#6b7280', margin: 0 }}>Preview — logo width {w}px on invoice</p>
+      {/* Footer label */}
+      <div style={{ padding: '5px 10px', background: '#f9fafb', borderTop: '1px solid #e5e7eb' }}>
+        <p style={{ fontSize: 10, color: '#6b7280', margin: 0 }}>Preview — logo width <strong>{w}px</strong> on invoice</p>
       </div>
     </div>
   )
