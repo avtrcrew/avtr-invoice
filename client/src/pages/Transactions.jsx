@@ -92,12 +92,12 @@ export default function Transactions() {
           </div>
         </div>
         <div className="card p-4 flex items-center gap-3">
-          <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${totalIncome - totalExpense >= 0 ? 'bg-blue-50' : 'bg-red-50'}`}>
-            <span className={`text-lg font-bold ${totalIncome - totalExpense >= 0 ? 'text-blue-600' : 'text-red-500'}`}>≈</span>
+          <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${totalIncome - totalExpense >= 0 ? 'bg-red-50' : 'bg-red-50'}`}>
+            <span className={`text-lg font-bold ${totalIncome - totalExpense >= 0 ? 'text-red-600' : 'text-red-500'}`}>≈</span>
           </div>
           <div>
             <p className="text-xs text-gray-400">Net</p>
-            <p className={`font-bold ${totalIncome - totalExpense >= 0 ? 'text-blue-600' : 'text-red-500'}`}>{fmt(totalIncome - totalExpense)}</p>
+            <p className={`font-bold ${totalIncome - totalExpense >= 0 ? 'text-red-600' : 'text-red-500'}`}>{fmt(totalIncome - totalExpense)}</p>
           </div>
         </div>
       </div>
@@ -107,7 +107,7 @@ export default function Transactions() {
         {['all', 'income', 'expense'].map(f => (
           <button key={f} onClick={() => setFilter(f)}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition ${
-              filter === f ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+              filter === f ? 'bg-red-600 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
             }`}>{f}</button>
         ))}
       </div>
@@ -116,7 +116,7 @@ export default function Transactions() {
       <div className="card overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-14">
-            <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-600" />
+            <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-red-600" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-14">

@@ -27,7 +27,7 @@ export default function Login({ onLogin }) {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+          <div className="w-14 h-14 bg-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
             <span className="text-white font-bold text-2xl">A</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">AVTR Invoice</h1>

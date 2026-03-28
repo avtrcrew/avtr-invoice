@@ -6,7 +6,7 @@ import { Plus, Search, Eye, Pencil, Trash2, CheckCircle } from 'lucide-react'
 
 const STATUS_BADGE = {
   draft:   'bg-gray-100 text-gray-600',
-  sent:    'bg-blue-100 text-blue-700',
+  sent:    'bg-red-100 text-red-700',
   paid:    'bg-green-100 text-green-700',
   overdue: 'bg-red-100 text-red-700',
 }
@@ -86,7 +86,7 @@ export default function Invoices() {
               key={s}
               onClick={() => setFilter(s)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition ${
-                filter === s ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                filter === s ? 'bg-red-600 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
               }`}
             >
               {s}
@@ -99,7 +99,7 @@ export default function Invoices() {
       <div className="card overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-600" />
+            <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-red-600" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-16">
@@ -124,7 +124,7 @@ export default function Invoices() {
             <tbody className="divide-y divide-gray-50">
               {filtered.map(inv => (
                 <tr key={inv.id} className="hover:bg-gray-50/50 transition">
-                  <td className="px-5 py-3.5 font-medium text-blue-600 cursor-pointer" onClick={() => navigate(`/invoices/${inv.id}`)}>
+                  <td className="px-5 py-3.5 font-medium text-red-600 cursor-pointer" onClick={() => navigate(`/invoices/${inv.id}`)}>
                     {inv.invoice_number}
                   </td>
                   <td className="px-5 py-3.5 text-gray-700">

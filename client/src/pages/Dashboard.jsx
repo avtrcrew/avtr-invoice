@@ -8,7 +8,7 @@ const fmt = (n) => `RM ${Number(n || 0).toLocaleString('en-MY', { minimumFractio
 
 const STATUS_BADGE = {
   draft:    'bg-gray-100 text-gray-600',
-  sent:     'bg-blue-100 text-blue-700',
+  sent:     'bg-red-100 text-red-700',
   paid:     'bg-green-100 text-green-700',
   overdue:  'bg-red-100 text-red-700',
 }
@@ -48,7 +48,7 @@ export default function Dashboard() {
 
   if (loading) return (
     <div className="p-8 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600" />
     </div>
   )
 
@@ -80,7 +80,7 @@ export default function Dashboard() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
-        <StatCard label="Total Invoiced" value={fmt(data?.totalInvoiced)} icon={FileText} color="bg-blue-50 text-blue-600" />
+        <StatCard label="Total Invoiced" value={fmt(data?.totalInvoiced)} icon={FileText} color="bg-red-50 text-red-600" />
         <StatCard label="Collected" value={fmt(data?.totalPaid)} icon={TrendingUp} color="bg-green-50 text-green-600" />
         <StatCard label="Outstanding" value={fmt(data?.totalOutstanding)} icon={Clock} color="bg-amber-50 text-amber-600" />
         <StatCard label="Expenses" value={fmt(data?.totalExpenses)} icon={TrendingDown} color="bg-red-50 text-red-500" sub={`Net: ${fmt(profit)}`} />
@@ -94,7 +94,7 @@ export default function Dashboard() {
             <h2 className="font-semibold text-gray-800 text-sm flex items-center gap-2">
               <FileText className="w-4 h-4 text-gray-400" /> Recent Invoices
             </h2>
-            <button onClick={() => navigate('/invoices')} className="text-xs text-blue-600 hover:underline">View all</button>
+            <button onClick={() => navigate('/invoices')} className="text-xs text-red-600 hover:underline">View all</button>
           </div>
           <div className="divide-y divide-gray-50">
             {data?.recentInvoices?.length === 0 && (
@@ -127,7 +127,7 @@ export default function Dashboard() {
             <h2 className="font-semibold text-gray-800 text-sm flex items-center gap-2">
               <ArrowLeftRight className="w-4 h-4 text-gray-400" /> Recent Transactions
             </h2>
-            <button onClick={() => navigate('/transactions')} className="text-xs text-blue-600 hover:underline">View all</button>
+            <button onClick={() => navigate('/transactions')} className="text-xs text-red-600 hover:underline">View all</button>
           </div>
           <div className="divide-y divide-gray-50">
             {data?.recentTransactions?.length === 0 && (

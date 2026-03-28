@@ -27,8 +27,11 @@ router.put('/:id', uploadFields, (req, res) => {
   if (!biz) return res.status(404).json({ error: 'Business not found' });
 
   const { name, address, email, phone, tax_number, bank_name, bank_account, bank_holder, tax_rate, invoice_prefix, logo_width, payment_instruction } = req.body;
-  const logo      = req.files?.logo?.[0]      ? `/uploads/${req.files.logo[0].filename}`      : biz.logo;
-  const signature = req.files?.signature?.[0] ? `/uploads/${req.files.signature[0].filename}` : biz.signature;
+  const logo = req.files?.logo?.[0] ? `/uploads/${req.files.logo[0].filename}` : biz.logo;
+  // signature: accept drawn data URL OR uploaded file, else keep existing
+  let signature = biz.signature;
+  if (req.files?.signature?.[0])       signature = `/uploads/${req.files.signature[0].filename}`;
+  else if (req.body.signature_data)    signature = req.body.signature_data;
 
   db.prepare(`
     UPDATE businesses SET name=?, address=?, email=?, phone=?, tax_number=?, bank_name=?, bank_account=?,

@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useApp } from '../App'
 import axios from 'axios'
 import { Save, Upload, Eye, EyeOff, Building2, Lock } from 'lucide-react'
+import SignaturePad from '../components/SignaturePad'
 
 // ─── Field helpers defined OUTSIDE component so React never remounts them ──────
 function Field({ label, value, onChange, type = 'text', placeholder }) {
@@ -43,10 +44,9 @@ export default function Settings() {
   const [logoFile, setLogoFile] = useState(null)
   const fileRef = useRef()
 
-  const [bizForms, setBizForms] = useState([])
-  const [sigPreview, setSigPreview] = useState(null)
-  const [sigFile, setSigFile]       = useState(null)
-  const sigRef = useRef()
+  const [bizForms, setBizForms]       = useState([])
+  const [savingSig, setSavingSig]     = useState(false)
+  const [sigSaved, setSigSaved]       = useState(false)
   const [pw, setPw] = useState({ current: '', newPw: '', confirm: '' })
   const [showPw, setShowPw] = useState(false)
   const [pwError, setPwError] = useState('')
@@ -83,11 +83,20 @@ export default function Settings() {
     setLogoPreview(URL.createObjectURL(file))
   }
 
-  const handleSigChange = (e) => {
-    const file = e.target.files[0]
-    if (!file) return
-    setSigFile(file)
-    setSigPreview(URL.createObjectURL(file))
+  const handleSaveSignature = async (dataURL) => {
+    setSavingSig(true)
+    setSigSaved(false)
+    try {
+      const biz = businesses[idx]
+      const fd  = new FormData()
+      fd.append('name',           form.name || biz.name)
+      fd.append('signature_data', dataURL)
+      await axios.put(`/api/businesses/${biz.id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+      await refreshBusinesses()
+      setBizForms(forms => forms.map((f, i) => i === idx ? { ...f, signature: dataURL } : f))
+      setSigSaved(true)
+      setTimeout(() => setSigSaved(false), 2500)
+    } finally { setSavingSig(false) }
   }
 
   const handleSaveBusiness = async (idx) => {
@@ -99,7 +108,6 @@ export default function Settings() {
       const fd = new FormData()
       Object.entries(form).forEach(([k, v]) => { if (k !== 'logo') fd.append(k, v ?? '') })
       if (logoFile && activeTab === idx) fd.append('logo', logoFile)
-      if (sigFile  && activeTab === idx) fd.append('signature', sigFile)
       await axios.put(`/api/businesses/${biz.id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
       await refreshBusinesses()
       setSaved(true)
@@ -142,7 +150,7 @@ export default function Settings() {
             key={biz.id}
             onClick={() => { setActiveTab(i); setLogoPreview(null); setLogoFile(null); setSaved(false) }}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition -mb-px ${
-              activeTab === i ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-800'
+              activeTab === i ? 'border-red-600 text-red-600' : 'border-transparent text-gray-500 hover:text-gray-800'
             }`}
           >
             <Building2 className="w-4 h-4" />
@@ -152,7 +160,7 @@ export default function Settings() {
         <button
           onClick={() => setActiveTab('password')}
           className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition -mb-px ${
-            activeTab === 'password' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-800'
+            activeTab === 'password' ? 'border-red-600 text-red-600' : 'border-transparent text-gray-500 hover:text-gray-800'
           }`}
         >
           <Lock className="w-4 h-4" />
@@ -244,7 +252,7 @@ export default function Settings() {
                 {/* Logo size slider */}
                 <div>
                   <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    Logo Size on Invoice — <span className="text-blue-600">{form.logo_width ?? 120}px</span>
+                    Logo Size on Invoice — <span className="text-red-600">{form.logo_width ?? 120}px</span>
                   </label>
                   <input
                     type="range"
@@ -314,27 +322,20 @@ export default function Settings() {
             />
           </div>
 
-          {/* Owner Signature */}
+          {/* Owner Signature — draw pad */}
           <div className="card p-5">
             <h2 className="font-semibold text-gray-800 text-sm mb-1">Owner / Authorised Signature</h2>
-            <p className="text-xs text-gray-400 mb-4">Upload a signature image — it will appear at the bottom of every invoice.</p>
-            <div className="flex items-start gap-5">
-              <div className="border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0"
-                style={{ width: 180, height: 80 }}>
-                {(sigPreview || form.signature) ? (
-                  <img src={sigPreview || form.signature} alt="Signature" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-                ) : (
-                  <span className="text-gray-300 text-xs text-center px-3">No signature</span>
-                )}
-              </div>
-              <div>
-                <input type="file" accept="image/*" ref={sigRef} className="hidden" onChange={handleSigChange} />
-                <button onClick={() => sigRef.current.click()} className="btn-secondary">
-                  <Upload className="w-4 h-4" /> Upload Signature
-                </button>
-                <p className="text-xs text-gray-400 mt-1.5">PNG with transparent background works best</p>
-              </div>
-            </div>
+            <p className="text-xs text-gray-400 mb-4">
+              Draw your signature below using your mouse or finger. It will appear on every invoice.
+            </p>
+            <SignaturePad
+              existing={form.signature}
+              onSave={handleSaveSignature}
+              saving={savingSig}
+            />
+            {sigSaved && (
+              <p className="text-sm text-green-600 mt-2">✓ Signature saved successfully.</p>
+            )}
           </div>
 
           {/* Save */}

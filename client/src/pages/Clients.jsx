@@ -90,7 +90,7 @@ export default function Clients() {
       {/* Grid */}
       {loading ? (
         <div className="flex items-center justify-center py-14">
-          <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-600" />
+          <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-red-600" />
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-14">
@@ -103,8 +103,8 @@ export default function Clients() {
           {filtered.map(c => (
             <div key={c.id} className="card p-5 hover:shadow-md transition group">
               <div className="flex items-start justify-between mb-3">
-                <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <span className="text-blue-600 font-bold text-sm">{c.name[0].toUpperCase()}</span>
+                <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <span className="text-red-600 font-bold text-sm">{c.name[0].toUpperCase()}</span>
                 </div>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
                   <button onClick={() => openEdit(c)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500"><Pencil className="w-3.5 h-3.5" /></button>

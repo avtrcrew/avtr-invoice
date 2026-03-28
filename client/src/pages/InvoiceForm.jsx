@@ -178,7 +178,7 @@ export default function InvoiceForm() {
 
   if (loading) return (
     <div className="p-8 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600" />
     </div>
   )
 
@@ -235,7 +235,7 @@ export default function InvoiceForm() {
               <h2 className="font-semibold text-gray-800 text-sm">Bill To</h2>
               <button
                 onClick={() => { setShowNewClient(s => !s); setClientErr('') }}
-                className={`btn-secondary text-xs py-1.5 ${showNewClient ? 'text-blue-600 border-blue-200 bg-blue-50' : ''}`}
+                className={`btn-secondary text-xs py-1.5 ${showNewClient ? 'text-red-600 border-red-200 bg-red-50' : ''}`}
               >
                 <UserPlus className="w-3.5 h-3.5" />
                 {showNewClient ? 'Cancel new client' : 'Add new client'}
@@ -257,8 +257,8 @@ export default function InvoiceForm() {
 
             {/* Inline new client form */}
             {showNewClient && (
-              <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 space-y-3">
-                <p className="text-xs font-semibold text-blue-700 mb-2">New Client Details</p>
+              <div className="bg-red-50 border border-red-100 rounded-xl p-4 space-y-3">
+                <p className="text-xs font-semibold text-red-700 mb-2">New Client Details</p>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">Name *</label>
@@ -341,7 +341,7 @@ export default function InvoiceForm() {
                           <button
                             type="button"
                             onClick={() => { setOpenCatalogIdx(openCatalogIdx === i ? null : i); setCatalogFilter('') }}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 transition"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-600 transition"
                             title="Browse catalog"
                           >
                             <ChevronDown className="w-3.5 h-3.5" />
@@ -368,10 +368,10 @@ export default function InvoiceForm() {
                             key={cat.id}
                             type="button"
                             onMouseDown={() => pickCatalog(i, cat)}
-                            className="w-full text-left px-3 py-2.5 hover:bg-blue-50 transition flex items-center justify-between group"
+                            className="w-full text-left px-3 py-2.5 hover:bg-red-50 transition flex items-center justify-between group"
                           >
                             <span className="text-sm text-gray-800 font-medium">{cat.name}</span>
-                            <span className="text-xs text-gray-500 group-hover:text-blue-600">RM {fmtNum(cat.unit_price)}</span>
+                            <span className="text-xs text-gray-500 group-hover:text-red-600">RM {fmtNum(cat.unit_price)}</span>
                           </button>
                         ))}
                       </div>
@@ -430,7 +430,7 @@ export default function InvoiceForm() {
               <span className="text-gray-500">Tax</span>
               <div className="flex items-center gap-1.5">
                 <input type="number" min="0" max="100"
-                  className="w-14 text-right text-xs border border-gray-200 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-14 text-right text-xs border border-gray-200 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-red-500"
                   value={form.tax_rate}
                   onChange={e => setForm(f => ({ ...f, tax_rate: e.target.value }))} />
                 <span className="text-gray-400 text-xs">%</span>
@@ -444,7 +444,7 @@ export default function InvoiceForm() {
             )}
             <div className="border-t border-gray-100 pt-3 flex justify-between">
               <span className="font-semibold text-gray-800">Total</span>
-              <span className="font-bold text-lg text-blue-600">RM {fmtNum(total)}</span>
+              <span className="font-bold text-lg text-red-600">RM {fmtNum(total)}</span>
             </div>
           </div>
 
